@@ -1,0 +1,7 @@
+datasets/
+deployment/
+knn_vc/
+logs/
+output_files/
+serve/
+venv/
