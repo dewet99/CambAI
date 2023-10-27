@@ -5,6 +5,7 @@ import os
 import torch, torchaudio
 # import IPython.display as ipd
 import urllib.parse
+import base64
 
 class KNN_VC_Handler(BaseHandler):
     """
@@ -42,38 +43,27 @@ class KNN_VC_Handler(BaseHandler):
 
         # if using python script to pass json file
 
-        data = data[0].get("body") # data is bytearray from json file 
- 
-        data_str = data.decode('utf-8')
-        parsed_data = urllib.parse.parse_qs(data_str)
+        inputs = data[0].get("body") # data is bytearray from json file 
+        if inputs == None:
+            inputs = data[0].get("data")
 
-        data_decoded = {}
-        for key, values in parsed_data.items():
-            if len(values) == 1:
-                # If a parameter appears only once, assign its value as a string
-                data_decoded[key] = urllib.parse.unquote(values[0])
-                
-            else:
-                # If a parameter appears multiple times, assign its values as a list
-                data_decoded[key] = [urllib.parse.unquote(val) for val in values]
+        inputs = inputs.decode('utf-8')
+        data = json.loads(inputs)
 
         # decoded_dict = {key: [urllib.parse.unquote(val) for val in values] for key, values in parsed_data.items()}
 
         # source_audio_paths = data["source_path"]
-        source_audio = data_decoded["source_audio"]
-        print("==============================================================")
-        print(f"Source audio elements type: {type(source_audio[15])}")
-        # print(f"Source audio : {source_audio}")
-        print("==============================================================")
-        # target_audios = [data.get(f'target_{i}') for i in range(len(target_audio_paths))]
+        source_audio = data["source_audio"]
+        target_audio = data["target_audios"]
 
-        # target_audio_paths = data["target_paths"]
-        target_audio = data_decoded["target_audios"]
+        # convert the target_audio list of lists into a list of tensors:
+        targets = [torch.tensor(target) for target in target_audio]
 
-        # ref_wav_paths = data["target_paths"]
+        # THere has to be a better way to send audio files to the docker container. Converting it from .flac to tensor to list to json, sending it to server, then decoding into string and
+        # then converting to ints by looping through individial items seems like it is very, very inefficient. If it works it works tho, I guess. Just slap a #TODO tag on that badboy
 
-        query_seq = self.model.get_features(source_audio) # Returns features of `path` waveform as a tensor of shape (seq_len, dim) --> data preprocessing
-        matching_set = self.model.get_matching_set(target_audio) # Get matching features to be used by wavlm --> Data preprocessing
+        query_seq = self.model.get_features(torch.tensor(source_audio)) # Returns features of `path` waveform as a tensor of shape (seq_len, dim) --> data preprocessing
+        matching_set = self.model.get_matching_set(targets) # Get matching features to be used by wavlm --> Data preprocessing
 
         # print("==========================")
         # print(f"Source audio: {source_audio_paths}")
@@ -81,7 +71,7 @@ class KNN_VC_Handler(BaseHandler):
         # print("==========================")
         # raise Exception
 
-        return query_seq, matching_set, data_decoded
+        return query_seq, matching_set, data
 
     def handle(self, data, context):
         """
@@ -95,26 +85,18 @@ class KNN_VC_Handler(BaseHandler):
         # First pre-process the data. Accept data as a dict, and get the stuff
         query_seq, matching_set, data = self.preprocess(data)
         out_wav = self.inference(query_seq,matching_set)
-        output_path = self.postprocess(data, out_wav)
-        return [output_path]
+        out_wav = self.postprocess(out_wav)
+        return [out_wav]
 
 
-    def postprocess(self, data, out_wav):
-        # ipd.Audio(out_wav.numpy(), rate=16000)
-        out_wav = out_wav.numpy()
-        dir = data["working_dir"]
-        parts = data["source_path"].split("/")
-        original_filename = parts[-1]
-        filename_without_extension = original_filename.split('.')[0]
-
-        path = f"{dir}/output_files/{filename_without_extension}_converted.wav"
-
-        torchaudio.save(path, out_wav[None], 16000)
-        return path
+    def postprocess(self, out_wav):
+        out_wav_list = out_wav.tolist()
+        return out_wav_list
 
 
     def inference(self, query, match):
-        return self.model.match(query, match, topk=4)
+        infer = self.model.match(query, match, topk=4)
+        return infer
         
         
 

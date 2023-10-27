@@ -9,22 +9,26 @@ import traceback
 import torchaudio
 import torch
 
-def send_audio_to_server(server_url, json_dict, id):
-    headers = {'Content-Type': 'application/json'}
-    response = requests.post(server_url, data=json_dict)
+def convert_json_paths_to_json_lists(path):
 
-    if response.status_code == 200:
-        # result = response.json()
-        # Process the inference result
-        print("======================================")
-        print(f"Inference successful for request number {id}")
-        print("======================================")
-        json_response = response.json()
-        torchaudio.save(f"output_files/output_{id}.wav", torch.tensor(json_response).unsqueeze(0), 16000)
+    audio_dict = {}
 
-    else:
-        # Handle errors or log them
-        print(f"Request failed with status code: {response.status_code}")
+    source_audio, _ = torchaudio.load(path["source_path"], normalize=True)
+    audio_dict["source_audio"] = source_audio.tolist()[0]
+
+    target_audios = []
+    for id, path in enumerate(path["target_paths"]):
+        ta, _ = torchaudio.load(path, normalize=True)
+        target_audios.append(ta.tolist()[0])
+
+    audio_dict["target_audios"] = target_audios
+
+    # json_file_path = "temp_dict.json"
+
+    # with open(json_file_path, "w") as json_file:
+    #     json.dump(audio_dict, json_file, ensure_ascii=False)
+
+    return audio_dict
 
 def generate_json_files_for_inference(dataset_path):
     
@@ -78,32 +82,6 @@ def generate_json_files_for_inference(dataset_path):
 
     return data
 
-
-def convert_json_paths_to_json_lists(path):
-
-    audio_dict = {}
-
-    source_audio, _ = torchaudio.load(path["source_path"], normalize=True)
-    audio_dict["source_audio"] = source_audio.tolist()[0]
-
-    target_audios = []
-    for id, path in enumerate(path["target_paths"]):
-        ta, _ = torchaudio.load(path, normalize=True)
-        target_audios.append(ta.tolist()[0])
-
-    audio_dict["target_audios"] = target_audios
-
-    # json_file_path = "temp_dict.json"
-
-    # with open(json_file_path, "w") as json_file:
-    #     json.dump(audio_dict, json_file, ensure_ascii=False)
-
-    return audio_dict
-
-
-
-
-
 def main():
 
     parser = argparse.ArgumentParser(description="Send audio files to TorchServe for inference.")
@@ -138,21 +116,11 @@ def main():
             # byte_array = json_string.encode('utf-8')
             # send_audio_to_server(server_url, byte_array, args.id)
         
-
-
-
     except Exception as e:
         traceback.print_exc()
         return
         
-
-
-    
-
     # Adjust to your server and model endpoint
-
-
-    
 
 if __name__ == "__main__":
     main()
