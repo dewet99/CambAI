@@ -42,7 +42,8 @@ class KNN_VC_Handler(BaseHandler):
 
         # if using python script to pass json file
 
-        data = data[0].get("body") # data is bytearray from json file  
+        data = data[0].get("body") # data is bytearray from json file 
+ 
         data_str = data.decode('utf-8')
         parsed_data = urllib.parse.parse_qs(data_str)
 
@@ -51,6 +52,7 @@ class KNN_VC_Handler(BaseHandler):
             if len(values) == 1:
                 # If a parameter appears only once, assign its value as a string
                 data_decoded[key] = urllib.parse.unquote(values[0])
+                
             else:
                 # If a parameter appears multiple times, assign its values as a list
                 data_decoded[key] = [urllib.parse.unquote(val) for val in values]
@@ -58,17 +60,20 @@ class KNN_VC_Handler(BaseHandler):
         # decoded_dict = {key: [urllib.parse.unquote(val) for val in values] for key, values in parsed_data.items()}
 
         # source_audio_paths = data["source_path"]
-        source_audio_paths = data_decoded["source_path"]
-
+        source_audio = data_decoded["source_audio"]
+        print("==============================================================")
+        print(f"Source audio elements type: {type(source_audio[15])}")
+        # print(f"Source audio : {source_audio}")
+        print("==============================================================")
         # target_audios = [data.get(f'target_{i}') for i in range(len(target_audio_paths))]
 
         # target_audio_paths = data["target_paths"]
-        target_audio_paths = data_decoded["target_paths"]
+        target_audio = data_decoded["target_audios"]
 
         # ref_wav_paths = data["target_paths"]
 
-        query_seq = self.model.get_features(source_audio_paths) # Returns features of `path` waveform as a tensor of shape (seq_len, dim) --> data preprocessing
-        matching_set = self.model.get_matching_set(target_audio_paths) # Get matching features to be used by wavlm --> Data preprocessing
+        query_seq = self.model.get_features(source_audio) # Returns features of `path` waveform as a tensor of shape (seq_len, dim) --> data preprocessing
+        matching_set = self.model.get_matching_set(target_audio) # Get matching features to be used by wavlm --> Data preprocessing
 
         # print("==========================")
         # print(f"Source audio: {source_audio_paths}")
