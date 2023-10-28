@@ -6,6 +6,7 @@ import torch, torchaudio
 # import IPython.display as ipd
 import urllib.parse
 import base64
+import torch.profiler as prof
 
 class KNN_VC_Handler(BaseHandler):
     """
@@ -22,6 +23,8 @@ class KNN_VC_Handler(BaseHandler):
         """
         Initialize model and resources here
         """
+        os.environ['LRU_CACHE_CAPACITY'] = '1'
+
         # From the exapmle:
         self.manifest = context.manifest
         properties = context.system_properties

@@ -82,12 +82,44 @@ def generate_json_files_for_inference(dataset_path):
 
     return data
 
+
+def generate_noise():
+    sr = 16000
+    min_audio_length = 3*sr
+    max_audio_length = 15*sr
+    mean = 0
+    std = 1
+
+
+    max_num_targets = 10
+    min_num_targets = 1
+
+    num_targets = np.random.randint(min_num_targets, max_num_targets)
+
+    num_src_samples = np.random.randint(min_audio_length, max_audio_length)
+
+    src = list(np.random.normal(mean, std, size=num_src_samples))
+
+    targets = []
+    for i in range(num_targets):
+        ns = np.random.randint(min_audio_length, max_audio_length)
+        trgt = list(np.random.normal(mean, std, size=ns))
+        targets.append(trgt)
+        
+    data = {
+            "source_audio": src,
+            "target_audios": targets
+            }
+
+    return data
+
 def main():
 
     parser = argparse.ArgumentParser(description="Send audio files to TorchServe for inference.")
     parser.add_argument("model_name", help = "Specify the model name as on torchserve")
     parser.add_argument("dataset_relative_path", help = "Path to the dataset test-clean relative to the current working directory")
     parser.add_argument("id", help = "Request id")
+    parser.add_argument("data_type", help="Whether to use real audio clips or noise for data, use 'noise' for noise and 'audio' for audio")
     args = parser.parse_args()
 
     # dataset_path = "/media/Data/CambAI/TakeHome/CambAI_TakeHome/datasets/LibriSpeech/test-clean"
@@ -103,12 +135,19 @@ def main():
 
     # Load audio file paths from the provided YAML file
     try:
-            paths  = generate_json_files_for_inference(dataset_path)
-            data = convert_json_paths_to_json_lists(paths)
-            
-            # sending to server via async curl thingies
-            with open("input_data.json", "w") as json_file:
-                json.dump(data, json_file)
+            if args.data_type == "audio":
+                paths  = generate_json_files_for_inference(dataset_path)
+                data = convert_json_paths_to_json_lists(paths)
+                
+                # sending to server via async curl thingies
+                with open("input_data.json", "w") as json_file:
+                    json.dump(data, json_file)
+
+
+            elif args.data_type == "noise":
+                data = generate_noise()
+                with open("input_data.json", "w") as json_file:
+                    json.dump(data, json_file)
             
             # Sending to server via python script:
             # let's manually convert to json

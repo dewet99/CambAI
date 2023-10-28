@@ -64,6 +64,7 @@ def generate_json_files_for_inference(dataset_path):
     target_files = [f for f in os.listdir(target_path) if os.path.isfile(os.path.join(target_path, f))]
     target_flac_files =[f for f in target_files if f.endswith('.flac')]
 
+    print(f"There are {len(target_flac_files)} files in the directory to select from")
     num_files_to_select = np.random.randint(1, len(target_flac_files)-1)
 
     target_files = random.sample(target_flac_files,num_files_to_select)
