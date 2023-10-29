@@ -64,6 +64,7 @@ We do a stress test with the following command:
 ```shell
 bash ./simulate_stress_test.sh 1000 knn_vc ./datasets/LibriSpeech/test-clean noise
 ```
-The torchserve container sends metrics to a Prometheus server via the provided metrics API, and we visualise it with Grafana.
+The torchserve container sends metrics to a Prometheus server via the provided metrics API, and we visualise it with Grafana. Note that the CPU Utilisation graph is not accurate. Prometheus sends a request every five seconds (in our config), so this is the CPU usage at 5 second intervals. Sometimes that will be between inference calls, sometimes it will be during, so it is not accurate. An expression in Grafana could be done to properly display CPU usage over time, but we did not have time.
+![Example Image](pics/dash.png)
 
 List the software and tools that users need to have installed before they can use your project. Include version numbers if necessary.
