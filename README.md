@@ -47,10 +47,10 @@ bash ./simulate_stress_test.sh --num_requests --model_name --dataset_relative_pa
 
 ```
 The args are as follows:
-1. `--num_requests`: How many inference requests to generate
-2. `--model_name`: knn_vc, it's the only one in the container
-3. `--dataset_relative_path`: Path to the LibriSpeech dataset for inferring with actual audio
-4. `--input_type`: noise or audio
+- `--num_requests`: How many inference requests to generate
+- `--model_name`: knn_vc, it's the only one in the container
+- `--dataset_relative_path`: Path to the LibriSpeech dataset for inferring with actual audio
+- `--input_type`: noise or audio
    
 The following command will run a stress test wtih 1000 inference requests, consisting of source and target clips of random noise:
 ```shell
