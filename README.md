@@ -84,3 +84,5 @@ Some notes about the noise generated for the stress test:
 1. Source clip is of random length, between 3 and 10 seconds.
 2. Target clips are of random length, also between 3 and 10 seconds each.
 3. The number of target clips can range between 1 and 10.
+
+Finally, the docker container has significantly more files in it than strictly necessary. I did not have time to clean up. I did not really have time for code cleanup in any of this project, to be honest.
