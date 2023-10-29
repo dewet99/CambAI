@@ -1,13 +1,17 @@
 import requests
 import argparse
-import yaml
+# import yaml
 import json
 import os
 import random
 import numpy as np
 import traceback
-import torchaudio
-import torch
+try:
+    import torchaudio
+    import torch
+except: 
+    print("torch and torchaudio not found.")
+
 
 def convert_json_paths_to_json_lists(path):
 
@@ -22,11 +26,6 @@ def convert_json_paths_to_json_lists(path):
         target_audios.append(ta.tolist()[0])
 
     audio_dict["target_audios"] = target_audios
-
-    # json_file_path = "temp_dict.json"
-
-    # with open(json_file_path, "w") as json_file:
-    #     json.dump(audio_dict, json_file, ensure_ascii=False)
 
     return audio_dict
 
@@ -86,7 +85,7 @@ def generate_json_files_for_inference(dataset_path):
 def generate_noise():
     sr = 16000
     min_audio_length = 3*sr
-    max_audio_length = 15*sr
+    max_audio_length = 10*sr
     mean = 0
     std = 1
 
@@ -126,7 +125,6 @@ def main():
 
     dataset_relative_path = args.dataset_relative_path
     dataset_path = f"{os.getcwd()}/{dataset_relative_path}" 
-    print(dataset_path)
     # TorchServe server URL and model endpoint
     # server_url = f"http://localhost:8080/predictions/{args.model_name}"
     # server_url = f"http://localhost:8081/predictions/model"
