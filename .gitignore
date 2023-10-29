@@ -6,3 +6,4 @@ output_files/
 serve/
 venv/
 input_data.json
+knn-vc-downloads/

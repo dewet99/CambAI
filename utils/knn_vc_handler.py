@@ -31,7 +31,7 @@ class KNN_VC_Handler(BaseHandler):
         self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
 
         # Download model
-        download_dir = "/home/model-server/knn_vc/knn-vc-downloads"
+        download_dir = "/home/model-server/knn-vc-downloads"
         torch.hub.set_dir(download_dir)
         self.model = torch.hub.load('bshall/knn-vc', 'knn_vc', prematched=True, trust_repo=True, pretrained=True, device=self.device)
         # self.model = knn_vc(pretrained=True, progress=True, prematched=True, device='cuda')
