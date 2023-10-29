@@ -2,7 +2,7 @@
 
 
 ## Description
-I created a very thorough readme file explaing word for word everything I had done and struggled with, but due to my excellent git proficiency I managed to lose all of that, so this slightly stripped down version will have to suffice because I am out of time. 
+I created a very thorough readme file explainig word for word everything I had done and struggled with, but due to my excellent git proficiency I managed to lose all of that, so this slightly stripped-down version will have to suffice because I am out of time. 
 
 ## Requirements
 - Python 3.10 or greater.
@@ -22,7 +22,7 @@ sudo docker run --gpus 1 --rm -it -p 127.0.0.1:8080:8080 -p 127.0.0.1:8081:8081 
 curl -X POST "localhost:8081/models?model_name=knn_vc&url=/home/model-server/model-store/model_store/knn_vc.mar&initial_workers=1"
 
 ```
-Succesfully registering the models should show the following in the terminal:
+Successfully registering the models should show the following in the terminal:
 ```shell
 {
   "status": "Model \"knn_vc\" Version: 1.0 registered with 1 initial workers"
@@ -31,7 +31,7 @@ Succesfully registering the models should show the following in the terminal:
 You can now start doing inference.
 
 ## Inference
-We have two kinds of inputs: Noise and audio. Running a stress test with audio will cause an out of memory error, because the number of inputs can become quite high. We used random noise as source and targets for inference.
+We have two kinds of inputs: Noise and audio. Running a stress test with audio will cause an out-of-memory error, because the number of inputs can become quite high. We used random noise as source and targets for inference.
 ```shell
 bash ./simulate_stress_test.sh --num_requests --model_name --dataset_relative_path --input_type
 
