@@ -1,22 +1,13 @@
 # CambAI Takehome Challenge
 
-A brief description of your project.
-
-## Table of Contents
-
-- [Project Name](#project-name)
-- [Description](#description)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
 
 ## Description
 
 Provide a more detailed description of your project here. Explain its purpose, features, and any other relevant information.
+
+## Requirements
+- Python 3.10 or greater.
+- Pytorch 2.1.0 and the corresponding torchaudio version, if you want to do inference with real audio.
 
 ## Getting Started
 I created a docker container with everything ready to go. Run the following commands:
@@ -68,6 +59,11 @@ bash ./simulate_stress_test.sh 1000 knn_vc ./datasets/LibriSpeech/test-clean aud
 This caused my PC to run out of memory, I did not have time to investigate whether it was a memory leak or just due to incorrect config options in terms of allocated RAM.
 The output data does not get saved, for either noise or real audio. Simply comment and uncomment the relevant lines in the `simulate_stress_test.sh` script to change this. We had some storage issues, hence this measure.
 
-### Prerequisites
+## Stress Test Results
+We do a stress test with the following command:
+```shell
+bash ./simulate_stress_test.sh 1000 knn_vc ./datasets/LibriSpeech/test-clean noise
+```
+The torchserve container sends metrics to a Prometheus server via the provided metrics API, and we visualise it with Grafana.
 
 List the software and tools that users need to have installed before they can use your project. Include version numbers if necessary.
