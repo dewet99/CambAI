@@ -23,7 +23,7 @@ class KNN_VC_Handler(BaseHandler):
         """
         Initialize model and resources here
         """
-        os.environ['LRU_CACHE_CAPACITY'] = '1'
+        os.environ['LRU_CACHE_CAPACITY'] = '1' # This supposedly helps with memory leaks when inputs are of varying lengths 
 
         # From the exapmle:
         self.manifest = context.manifest
@@ -34,17 +34,10 @@ class KNN_VC_Handler(BaseHandler):
         download_dir = "/home/model-server/knn-vc-downloads"
         torch.hub.set_dir(download_dir)
         self.model = torch.hub.load('bshall/knn-vc', 'knn_vc', prematched=True, trust_repo=True, pretrained=True, device=self.device)
-        # self.model = knn_vc(pretrained=True, progress=True, prematched=True, device='cuda')
 
         self.initialized = True
 
     def preprocess(self, data):
-        
-        # if using curl to pass json file:
-        # data = data[0].get("body") # data is bytearray from json file  
-        # data = json.loads(data.decode('utf-8')) # converted to dict
-
-        # if using python script to pass json file
 
         inputs = data[0].get("body") # data is bytearray from json file 
         if inputs == None:
@@ -53,7 +46,6 @@ class KNN_VC_Handler(BaseHandler):
         inputs = inputs.decode('utf-8')
         data = json.loads(inputs)
 
-        # decoded_dict = {key: [urllib.parse.unquote(val) for val in values] for key, values in parsed_data.items()}
 
         # source_audio_paths = data["source_path"]
         source_audio = data["source_audio"]
@@ -62,17 +54,8 @@ class KNN_VC_Handler(BaseHandler):
         # convert the target_audio list of lists into a list of tensors:
         targets = [torch.tensor(target) for target in target_audio]
 
-        # THere has to be a better way to send audio files to the docker container. Converting it from .flac to tensor to list to json, sending it to server, then decoding into string and
-        # then converting to ints by looping through individial items seems like it is very, very inefficient. If it works it works tho, I guess. Just slap a #TODO tag on that badboy
-
-        query_seq = self.model.get_features(torch.tensor(source_audio)) # Returns features of `path` waveform as a tensor of shape (seq_len, dim) --> data preprocessing
-        matching_set = self.model.get_matching_set(targets) # Get matching features to be used by wavlm --> Data preprocessing
-
-        # print("==========================")
-        # print(f"Source audio: {source_audio_paths}")
-        # print(f"Target audio: {target_audio_paths}")
-        # print("==========================")
-        # raise Exception
+        query_seq = self.model.get_features(torch.tensor(source_audio))
+        matching_set = self.model.get_matching_set(targets)
 
         return query_seq, matching_set, data
 
