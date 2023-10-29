@@ -2,7 +2,7 @@
 
 
 ## Description
-I created a very thorough readme file explainig word for word everything I had done and struggled with, but due to my excellent git proficiency I managed to lose all of that, so this slightly stripped-down version will have to suffice because I am out of time. 
+I created a very thorough readme file explainig word for word everything I had done and struggled with, but due to my excellent git proficiency I managed to lose all of that, so this slightly stripped-down version will have to suffice because I am out of time. Quite a few of the files in the repo are unnecesary, but the below should be enough to determine what is useful and what is not.
 
 ## Requirements
 - Python 3.10 or greater.
