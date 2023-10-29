@@ -66,11 +66,22 @@ bash ./simulate_stress_test.sh 1000 knn_vc ./datasets/LibriSpeech/test-clean noi
 ```
 The torchserve container sends metrics to a Prometheus server via the provided metrics API, and we visualise it with Grafana. Note that the CPU Utilisation graph is not accurate. Prometheus sends a request every five seconds (in our config), so this is the CPU usage at 5 second intervals. Sometimes that will be between inference calls, sometimes it will be during, so it is not accurate. An expression in Grafana could be done to properly display CPU usage over time, but we did not have time.
 ![Example Image](pics/dash.png)
-From the above graphs it does not seem like there is a memory leak. However, during implementation it seemed like there was a memory leak. This is, allegedly, due to the varying input sizes. One suggestions was to include the following line of code, which we did in the knn_vc_handler.py file:
-```python
-os.environ['LRU_CACHE_CAPACITY'] = '1'
-```
-This did seem to reduce the memory crashes, but many of our stress tests had our torchserve container crashing with java running out of heap space. This could be a config option, we could simply allocate more heap space. We did not have time to test this, but it can be done by changing the config.properties file and copying the new one into the container, before re-registering the models.
 
+## Some Notes:
+A brief summary of the process that can be taken to achieve the same result. Assuming you have some knowledge of how to Google or ask ChatGPT, the following should be sufficient to reproduce my work. 
+1. Clone the knn_vc (https://github.com/bshall/knn-vc) and torchserve (https://github.com/pytorch/serve) repos
+2. Run the example notebook provided by knn_vc, and save the `knn_vc.state_dict()` to a .pth file. This is because the torchserve model archiver needs the .pth file to create a .mar file.
+3. Create a custom handler - mine is knn_vc_handler.py. See (https://pytorch.org/serve/custom_service.html) to understand the why.
+4. Create the torchserve docker image (tutorial at https://github.com/pytorch/serve/tree/master/docker).
+5. Run the docker image and map the following into directories of your choosing within the docker container:
+   - the saved .pth file
+   - the custom handler.py file
+   - the matcher.py from the knn_vc repo
+6. With that done, you can run the torchserve model archiver from within the docker container. This is also explained at (https://github.com/pytorch/serve/tree/master/docker)
+7. Register the .mar file using curl, as we did above. The exact command might change depending on where you saved the .mar file.
+8. You are now ready for inference, I think.
 
-List the software and tools that users need to have installed before they can use your project. Include version numbers if necessary.
+Some notes about the noise generated for the stress test:
+1. Source clip is of random length, between 3 and 10 seconds.
+2. Target clips are of random length, also between 3 and 10 seconds each.
+3. The number of target clips can range between 1 and 10.
