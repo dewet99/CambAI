@@ -2,8 +2,7 @@
 
 
 ## Description
-
-Provide a more detailed description of your project here. Explain its purpose, features, and any other relevant information.
+I created a very thorough readme file explaing word for word everything I had done and struggled with, but due to my excellent git proficiency I managed to lose all of that, so this slightly stripped down version will have to suffice because I am out of time. 
 
 ## Requirements
 - Python 3.10 or greater.
