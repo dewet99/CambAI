@@ -66,5 +66,11 @@ bash ./simulate_stress_test.sh 1000 knn_vc ./datasets/LibriSpeech/test-clean noi
 ```
 The torchserve container sends metrics to a Prometheus server via the provided metrics API, and we visualise it with Grafana. Note that the CPU Utilisation graph is not accurate. Prometheus sends a request every five seconds (in our config), so this is the CPU usage at 5 second intervals. Sometimes that will be between inference calls, sometimes it will be during, so it is not accurate. An expression in Grafana could be done to properly display CPU usage over time, but we did not have time.
 ![Example Image](pics/dash.png)
+From the above graphs it does not seem like there is a memory leak. However, during implementation it seemed like there was a memory leak. This is, allegedly, due to the varying input sizes. One suggestions was to include the following line of code, which we did in the knn_vc_handler.py file:
+```python
+os.environ['LRU_CACHE_CAPACITY'] = '1'
+```
+This did seem to reduce the memory crashes, but many of our stress tests had our torchserve container crashing with java running out of heap space. This could be a config option, we could simply allocate more heap space. We did not have time to test this, but it can be done by changing the config.properties file and copying the new one into the container, before re-registering the models.
+
 
 List the software and tools that users need to have installed before they can use your project. Include version numbers if necessary.
