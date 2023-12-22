@@ -1,6 +1,7 @@
 datasets/
 deployment/
 knn_vc/
+knn-vc/
 logs/
 output_files/
 serve/
