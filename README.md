@@ -1,8 +1,12 @@
-# CambAI Takehome Challenge
+# Hosting a KNN-VC model with a TorchServe Docker container
 
 
 ## Description
-I created a very thorough readme file explainig word for word everything I had done and struggled with, but due to my excellent git proficiency I managed to lose all of that, so this slightly stripped-down version will have to suffice because I am out of time. Quite a few of the files in the repo are unnecesary, but the below should be enough to determine what is useful and what is not.
+The purpose of this project was to become familiar with TorchServe and Docker, and play around with some of the tools used when working as an ML Infrastructure Engineer. This problem was setup as a coding challenge for a pre-screening for a job interview.
+In this project, we do the following:
+1. Create a TorchServe handler for the knn-vc model.
+2. Create a Docker container to remote perform inference requests with the knn-vc model.
+3. Perform a simple stress-test and visualise it with Grafana.
 
 ## Requirements
 - Python 3.10 or greater.
@@ -31,7 +35,8 @@ Successfully registering the models should show the following in the terminal:
 You can now start doing inference.
 
 ## Inference
-We have two kinds of inputs: Noise and audio. Running a stress test with audio will cause an out-of-memory error, because the number of inputs can become quite high. We used random noise as source and targets for inference.
+We have two kinds of inputs: Noise and audio. We used random noise as source and targets for inference during the stress test.
+
 ```shell
 bash ./simulate_stress_test.sh --num_requests --model_name --dataset_relative_path --input_type
 
@@ -51,12 +56,12 @@ Inferring with actual audio requires the LibriSpeech test-clean set. You can dow
 ```shell
 bash ./get_speech
 ```
-In theory, that should download and extract the dataset to the correct location. Can then do a stress test with real audio using the following command:
+That should download and extract the dataset to the correct location. You can then do a stress test with real audio using the following command:
 ```shell
 bash ./simulate_stress_test.sh 1000 knn_vc ./datasets/LibriSpeech/test-clean audio
 ```
-This caused my PC to run out of memory, I did not have time to investigate whether it was a memory leak or just due to incorrect config options in terms of allocated RAM.
-The output data does not get saved, for either noise or real audio. Simply comment and uncomment the relevant lines in the `simulate_stress_test.sh` script to change this. We had some storage issues, hence this measure.
+<!-- This caused my PC to run out of memory, I did not have time to investigate whether it was a memory leak or just due to incorrect config options in terms of allocated RAM. -->
+The output data does not get saved, for either noise or real audio. Simply comment and uncomment the relevant lines in the `simulate_stress_test.sh` script to change this.
 
 ## Stress Test Results
 We do a stress test with the following command:
@@ -67,22 +72,15 @@ The torchserve container sends metrics to a Prometheus server via the provided m
 ![Example Image](pics/dash.png)
 
 ## Some Notes:
-A brief summary of the process that can be taken to achieve the same result. Assuming you have some knowledge of how to Google or ask ChatGPT, the following should be sufficient to reproduce my work. 
+A brief summary of the process that can be taken to achieve the same result:
+
 1. Clone the knn_vc (https://github.com/bshall/knn-vc) and torchserve (https://github.com/pytorch/serve) repos
 2. Run the example notebook provided by knn_vc, and save the `knn_vc.state_dict()` to a .pth file. This is because the torchserve model archiver needs the .pth file to create a .mar file.
 3. Create a custom handler - mine is knn_vc_handler.py. See (https://pytorch.org/serve/custom_service.html) to understand the why.
 4. Create the torchserve docker image (tutorial at https://github.com/pytorch/serve/tree/master/docker).
-5. Run the docker image and map the following into directories of your choosing within the docker container:
-   - the saved .pth file
-   - the custom handler.py file
-   - the matcher.py from the knn_vc repo
-6. With that done, you can run the torchserve model archiver from within the docker container. This is also explained at (https://github.com/pytorch/serve/tree/master/docker)
+5. Run the docker image to see whether it worked succesfully.
+6. With that done, you can run the torchserve model archiver to obtain a .mar file. This is also explained at (https://github.com/pytorch/serve/tree/master/docker)
 7. Register the .mar file using curl, as we did above. The exact command might change depending on where you saved the .mar file.
-8. You are now ready for inference, I think.
+8. You are now ready for inference.
 
-Some notes about the noise generated for the stress test:
-1. Source clip is of random length, between 3 and 10 seconds.
-2. Target clips are of random length, also between 3 and 10 seconds each.
-3. The number of target clips can range between 1 and 10.
-
-Finally, the docker container has significantly more files in it than strictly necessary. I did not have time to clean up. I did not really have time for code cleanup in any of this project, to be honest.
+Finally, the docker container used in the project has significantly more files in it than strictly necessary, you can get by without most of the files mapped into the container. It's funcional, but ugly.
